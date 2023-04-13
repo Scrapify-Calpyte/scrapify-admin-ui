@@ -134,33 +134,6 @@ export default function CategoryAdd({ open, setOpen, reload, rowId, setRowId }) 
                                 />
                             </FormControl>
                         </div>
-                        {/* <div className="col-md-12" style={{ minHeight: '60px' }}>
-                            <FormControl fullWidth size="small" error={!!formik.errors.fuel} className="col-md-4">
-                                <InputLabel id="fuel-select">Fuel</InputLabel>
-                                <Select
-                                    id="fuel-select"
-                                    MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
-                                    label="Fuel"
-                                    name="fuel"
-                                    value={formik.values.fuel}
-                                    onChange={formik.handleChange}
-                                    variant="outlined"
-                                    error={!!formik.errors.fuel}
-                                >
-                                    <MenuItem key="none" value="">
-                                        None
-                                    </MenuItem>
-                                    {['fuel one', 'fuel two'].map((fuel, index) => {
-                                        return (
-                                            <MenuItem key={fuel} value={fuel}>
-                                                {fuel}
-                                            </MenuItem>
-                                        );
-                                    })}
-                                </Select>
-                                <FormHelperText sx={{ color: 'red', margin: 0 }}>{formik.errors.fuel}</FormHelperText>
-                            </FormControl>
-                        </div> */}
                     </DialogContent>
                     <DialogActions>
                         <Button type="submit">Submit</Button>
