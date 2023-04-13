@@ -13,7 +13,7 @@ export const menuList = [
     },
     {
         icon: <FilterAltOutlinedIcon />,
-        title: 'MASTER',
+        title: 'Master',
         type: 'group',
         items: [
             {
@@ -30,7 +30,7 @@ export const menuList = [
     },
     {
         icon: <AdminPanelSettingsIcon />,
-        title: 'SETTINGS',
+        title: 'Settings',
         type: 'group',
         items: []
     }

@@ -1,10 +1,4 @@
 import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 import { useState } from 'react';
@@ -15,6 +9,7 @@ import { IconButton } from '@mui/material';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import TextField from '@mui/material/TextField';
 import { useEffect } from 'react';
+import Button from '@mui/material/Button';
 
 function CommonTable({
     displayedColumns = [],
@@ -25,37 +20,56 @@ function CommonTable({
     isEdit = true,
     isDetail = false,
     canShowSearch = true,
-    count,
-    postPerPage = 10,
-    pageNumber = 1,
-    filters = [],
+    count = 0,
     isPagination = true,
-    editRow,
-    deleteRow,
-    detailRow
+    rowAction,
+    searchEvent,
+    paginate
 }) {
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [rows, setRows] = useState(data);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    var filters = [];
 
     const handleChangePage = (event, newPage) => {
+        let pageObject = {
+            postPerPage: rowsPerPage,
+            pageNumber: newPage + 1
+        };
+        paginate(pageObject);
         setPage(newPage);
     };
 
     const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
+        let pageObject = {
+            postPerPage: event.target.value,
+            pageNumber: 1
+        };
+        paginate(pageObject);
         setPage(0);
+        setRowsPerPage(parseInt(event.target.value));
     };
 
-    useEffect(() => {
-        setRows(data);
-    }, []);
+    useEffect(() => {}, []);
 
-    function onPaginate(pageSize) {
-        this.postPerPage = +pageSize;
-        this.pageNumber = +pageSize + 1;
-        let pageObject = { postPerPage: this.postPerPage, pageNumber: this.pageNumber };
-        alert(JSON.stringify(pageObject));
+    const handleSearch = (event) => {
+        const filter = {
+            key: event?.target?.id,
+            operation: ':',
+            orPredicate: false,
+            value: event?.target?.value
+        };
+        const objIndex = filters.findIndex((obj) => obj.key === event?.target?.id);
+        if (objIndex !== -1) {
+            filters[objIndex] = filter;
+        } else {
+            filters.push(filter);
+        }
+        searchEvent(filters);
+    };
+
+    function reset() {
+        filters = [];
+        searchEvent(filters);
     }
 
     return (
@@ -63,8 +77,8 @@ function CommonTable({
             <table className="table">
                 <thead>
                     <tr>
-                        {displayedColumns?.map((col) => (
-                            <th style={{ color: '#757575' }} scope="col">
+                        {displayedColumns?.map((col, index) => (
+                            <th key={'h' + index} style={{ color: '#757575' }} scope="col">
                                 {col}
                             </th>
                         ))}
@@ -76,46 +90,61 @@ function CommonTable({
                             <></>
                         )}
                     </tr>
-                </thead>
-                <tbody>
-                    {canShowSearch == true ? (
+                    {canShowSearch ? (
                         <tr>
-                            {searchColumns?.map((searchCol) => {
-                                searchCol?.canShow == true ? (
-                                    <td>
-                                        <TextField id="outlined-basic" label={searchCol?.name} variant="outlined" />
+                            {searchColumns.map((searchCol, index) => {
+                                return (
+                                    <td key={'s' + index}>
+                                        {searchCol.canShow ? (
+                                            <TextField
+                                                fullWidth
+                                                size="small"
+                                                id={searchCol?.name}
+                                                onKeyUp={handleSearch}
+                                                className="inputs"
+                                                label={'Search ' + searchCol?.name}
+                                                variant="outlined"
+                                            />
+                                        ) : (
+                                            <></>
+                                        )}
                                     </td>
-                                ) : (
-                                    <td></td>
                                 );
                             })}
+                            <td>
+                                <Button variant="text" sx={{ color: '#1bd7a0' }} onClick={reset}>
+                                    RESET
+                                </Button>
+                            </td>
                         </tr>
                     ) : (
                         <></>
                     )}
-                    {rows?.map((row) => {
+                </thead>
+                <tbody>
+                    {data?.map((row, index) => {
                         return (
-                            <tr>
-                                {definedColumns?.map((col) => {
-                                    return <td>{row[col]}</td>;
+                            <tr key={'r' + index}>
+                                {definedColumns?.map((col, index) => {
+                                    return <td key={'d' + index}>{row[col]?.name ? row[col]?.name + '' : row[col] + ''}</td>;
                                 })}
                                 {isAction ? (
                                     <td>
                                         {isDetail ? (
-                                            <IconButton size="small" onClick={() => detailRow(row?.id)}>
+                                            <IconButton size="small" onClick={() => rowAction({ name: 'detail', value: row?.id })}>
                                                 <RemoveRedEyeIcon />
                                             </IconButton>
                                         ) : (
                                             <></>
                                         )}
                                         {isEdit ? (
-                                            <IconButton size="small" onClick={() => editRow(row?.id)}>
+                                            <IconButton size="small" onClick={() => rowAction({ name: 'edit', value: row?.id })}>
                                                 <EditIcon sx={{ color: 'blue' }} />
                                             </IconButton>
                                         ) : (
                                             <></>
                                         )}
-                                        <IconButton size="small" onClick={() => deleteRow(row?.id)}>
+                                        <IconButton size="small" onClick={() => rowAction({ name: 'delete', value: row?.id })}>
                                             <DeleteIcon sx={{ color: 'red' }} />
                                         </IconButton>
                                     </td>
@@ -127,15 +156,24 @@ function CommonTable({
                     })}
                 </tbody>
             </table>
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+            {isPagination ? (
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 100]}
+                    component="div"
+                    // sx={{
+                    //     spacer: {
+                    //         flex: 'none'
+                    //     }
+                    // }}
+                    count={count}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            ) : (
+                <></>
+            )}
         </>
     );
 }
@@ -150,13 +188,11 @@ CommonTable.propTypes = {
     isDetail: PropTypes.bool,
     canShowSearch: PropTypes.bool,
     count: PropTypes.number,
-    postPerPage: PropTypes.number,
-    pageNumber: PropTypes.number,
-    filters: PropTypes.array,
     isPagination: PropTypes.bool,
-    editRow: PropTypes.any,
-    deleteRow: PropTypes.any,
-    detailRow: PropTypes.any
+    rowAction: PropTypes.any,
+    paginate: PropTypes.any,
+    searchEvent: PropTypes.any
+    // dataTrigger: PropTypes.instanceOf(Subject)
 };
 
 export default CommonTable;

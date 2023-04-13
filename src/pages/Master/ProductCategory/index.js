@@ -29,15 +29,21 @@ TabPanel.propTypes = {
 export default function ProductCategory() {
     const [value, setValue] = useState(0);
     const $categoryTrigger = new Subject();
+    const $productTrigger = new Subject();
 
     useEffect(() => {
         return () => {
             $categoryTrigger.unsubscribe();
+            $productTrigger.unsubscribe();
         };
     }, []);
 
     function add() {
-        $categoryTrigger.next(true);
+        if (value == 0) {
+            $categoryTrigger.next(true);
+        } else {
+            $productTrigger.next(true);
+        }
     }
 
     const handleChange = (event, newValue) => {
@@ -65,7 +71,7 @@ export default function ProductCategory() {
                     <Category categoryTrigger={$categoryTrigger} />
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    <Product />
+                    <Product productTrigger={$productTrigger} />
                 </TabPanel>
             </Box>
         </>
