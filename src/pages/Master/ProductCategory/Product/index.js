@@ -1,6 +1,9 @@
 import CommonTable from '/src/components/CommonTable';
 import ProductAdd from './ProductAdd/index';
 import { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 
 export default function Product({ productTrigger }) {
     const [open, setOpen] = useState(false);
@@ -9,6 +12,7 @@ export default function Product({ productTrigger }) {
     const [rowId, setRowId] = useState(null);
     const displayedColumns = ['Name', 'Category'];
     const definedColumns = ['name', 'category'];
+    const [isComplete, setIsComplete] = useState(false);
     const searchColumns = [
         { name: 'name', canShow: true },
         { name: 'category.name', canShow: true }
@@ -60,7 +64,7 @@ export default function Product({ productTrigger }) {
             redirect: 'follow',
             referrerPolicy: 'no-referrer',
             body: JSON.stringify(data)
-        });
+        }).catch((error) => setIsComplete(true));
         return response.json();
     }
 
@@ -73,6 +77,7 @@ export default function Product({ productTrigger }) {
         };
         postData('http://localhost:8000/master/sub-category/get-all', data).then((response) => {
             setProducts(response.data);
+            setIsComplete(true);
             setCount(response?.recordsTotal);
         });
     }
@@ -90,22 +95,47 @@ export default function Product({ productTrigger }) {
 
     return (
         <>
-            <CommonTable
-                displayedColumns={displayedColumns}
-                definedColumns={definedColumns}
-                searchColumns={searchColumns}
-                data={products}
-                isAction={true}
-                isDetail={false}
-                isEdit={true}
-                isPagination={true}
-                rowAction={rowAction}
-                count={count}
-                canShowSearch={true}
-                paginate={paginate}
-                searchEvent={search}
-            ></CommonTable>
-            <ProductAdd open={open} setRowId={setRowId} rowId={rowId} setOpen={setOpen} reload={loadData} />
+            {!isComplete ? (
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: window.innerHeight - 400,
+                        width: '100%'
+                    }}
+                >
+                    <Stack alignItems="center">
+                        <CircularProgress
+                            sx={{
+                                color: '#1bd7a0',
+                                zIndex: 1
+                            }}
+                        />
+                        <br></br>
+                        <b style={{ color: '#1bd7a0' }}>Fetching</b>
+                    </Stack>
+                </Box>
+            ) : (
+                <>
+                    <CommonTable
+                        displayedColumns={displayedColumns}
+                        definedColumns={definedColumns}
+                        searchColumns={searchColumns}
+                        data={products}
+                        isAction={true}
+                        isDetail={false}
+                        isEdit={true}
+                        isPagination={true}
+                        rowAction={rowAction}
+                        count={count}
+                        canShowSearch={true}
+                        paginate={paginate}
+                        searchEvent={search}
+                    ></CommonTable>
+                    <ProductAdd open={open} setRowId={setRowId} rowId={rowId} setOpen={setOpen} reload={loadData} />
+                </>
+            )}
         </>
     );
 }
