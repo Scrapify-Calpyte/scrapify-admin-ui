@@ -81,15 +81,15 @@ export default function ProductAdd({ open, setOpen, reload, rowId, setRowId }) {
                 handleClose();
             })
             .catch((error) => {
-                console.log(error);
                 formik.resetForm();
                 handleClose();
             });
     };
 
     const handleClose = () => {
-        setOpen(false);
+        formik.resetForm();
         setRowId(null);
+        setOpen(false);
     };
 
     return (
@@ -134,8 +134,8 @@ export default function ProductAdd({ open, setOpen, reload, rowId, setRowId }) {
                             </FormControl>
                         </div>
                         <div className="col-md-12" style={{ minHeight: '60px' }}>
-                            <FormControl fullWidth size="small" error={!!formik.errors.fuel} className="col-md-4">
-                                <InputLabel id="category">Fuel</InputLabel>
+                            <FormControl fullWidth size="small" error={!!formik.errors.category} className="col-md-4">
+                                <InputLabel id="category">Category</InputLabel>
                                 <Select
                                     id="category"
                                     MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
@@ -163,14 +163,7 @@ export default function ProductAdd({ open, setOpen, reload, rowId, setRowId }) {
                     </DialogContent>
                     <DialogActions>
                         <Button type="submit">Submit</Button>
-                        <Button
-                            onClick={() => {
-                                formik.resetForm();
-                                handleClose();
-                            }}
-                        >
-                            Cancel
-                        </Button>
+                        <Button onClick={handleClose}>Cancel</Button>
                     </DialogActions>
                 </form>
             </Dialog>
