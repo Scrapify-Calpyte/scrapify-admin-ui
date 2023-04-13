@@ -1,41 +1,77 @@
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
-import { useState } from 'react';
-import { useEffect } from 'react';
 import Stack from '@mui/material/Stack';
-import { useForm } from 'react-hook-form';
 import TextField from '@mui/material/TextField';
-import HelperTextMessage from '/src/components/HelperTextMessage';
+import * as yup from 'yup';
+import { useFormik } from 'formik';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import axios from '../../../../../util/axios';
+import { useEffect, useState } from 'react';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
-export default function CategoryAdd({ open, setOpen, reload }) {
-    const {
-        register: categoryForm,
-        handleSubmit,
-        formState: { errors },
-        reset
-    } = useForm({
-        defaultValues: {
-            name: ''
+const validationSchema = yup.object().shape({
+    name: yup.string().required(),
+    isActive: yup.bool().required()
+});
+
+export default function CategoryAdd({ open, setOpen, reload, rowId, setRowId }) {
+    const formik = useFormik({
+        initialValues: {
+            name: '',
+            isActive: true
+        },
+        validationSchema: validationSchema,
+        onSubmit: (values) => {
+            submit(values);
         }
     });
-    const onSubmit = (data, e) => {
-        // if (errors) {
-        //     console.log(errors);
-        // } else {
-        console.log(data);
-        reload();
-        e.target.reset();
-        setOpen(false);
-        // }
+
+    const getValueById = () => {
+        axios
+            .get('category/by-id?id=' + rowId)
+            .then((response) => {
+                formik.setValues({
+                    name: response.data?.name,
+                    isActive: response.data?.active
+                });
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
+
+    useEffect(() => {
+        if (rowId) getValueById();
+    }, [rowId]);
+
+    const submit = (values) => {
+        values['id'] = rowId ? rowId : null;
+        axios
+            .post('category/save', values)
+            .then((response) => {
+                reload();
+                console.log(response.data);
+                formik.resetForm();
+                handleClose();
+            })
+            .catch((error) => {
+                console.log(error);
+                formik.resetForm();
+                handleClose();
+            });
     };
 
     const handleClose = () => {
-        reset();
         setOpen(false);
+        setRowId(null);
     };
 
     return (
@@ -52,35 +88,94 @@ export default function CategoryAdd({ open, setOpen, reload }) {
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={formik.handleSubmit}>
                     <DialogTitle id="alert-dialog-title">
                         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-                            <p>{'Add Product'}</p>
-                            <Button variant="filled" onClick={handleClose}>
+                            <p>{'Add Category'}</p>
+                            {/* <Button size="small" onClick={handleClose}>
                                 x
-                            </Button>
+                            </Button> */}
                         </Stack>
                     </DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            className="col-3"
-                            error={Boolean(errors?.name)}
-                            helperText={<HelperTextMessage type={errors?.name?.type} />}
-                            {...categoryForm('name', { required: true, maxLength: 5 })}
-                            id="name"
-                            label="Name"
-                            size="medium"
-                            margin="normal"
-                            fullWidth={true}
-                            variant="filled"
-                        />
+                    <DialogContent className="row col-12">
+                        <div className="col-12" style={{ minHeight: '65px', paddingTop: '5px' }}>
+                            <FormControl fullWidth>
+                                <TextField
+                                    id="name"
+                                    name="name"
+                                    label="Name"
+                                    value={formik.values.name}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    error={formik.touched.name && Boolean(formik.errors.name)}
+                                    size="small"
+                                    fullWidth={true}
+                                    // variant="oulined"
+                                />
+                                <FormHelperText sx={{ color: 'red', margin: 0 }}>{formik.errors.name}</FormHelperText>
+                            </FormControl>
+                        </div>
+                        <div className="col-12" style={{ minHeight: '65px', paddingTop: '5px' }}>
+                            <FormControl>
+                                <FormControlLabel
+                                    sx={{ margin: 0, padding: 0 }}
+                                    control={
+                                        <Switch
+                                            id="isActive"
+                                            name="isActive"
+                                            label="Is Active"
+                                            value={formik.values.isActive}
+                                            checked={formik.values.isActive}
+                                            onChange={formik.handleChange}
+                                        />
+                                    }
+                                    label="Is active ?"
+                                    labelPlacement="start"
+                                />
+                            </FormControl>
+                        </div>
+                        {/* <div className="col-md-12" style={{ minHeight: '60px' }}>
+                            <FormControl fullWidth size="small" error={!!formik.errors.fuel} className="col-md-4">
+                                <InputLabel id="fuel-select">Fuel</InputLabel>
+                                <Select
+                                    id="fuel-select"
+                                    MenuProps={{ PaperProps: { sx: { maxHeight: 200 } } }}
+                                    label="Fuel"
+                                    name="fuel"
+                                    value={formik.values.fuel}
+                                    onChange={formik.handleChange}
+                                    variant="outlined"
+                                    error={!!formik.errors.fuel}
+                                >
+                                    <MenuItem key="none" value="">
+                                        None
+                                    </MenuItem>
+                                    {['fuel one', 'fuel two'].map((fuel, index) => {
+                                        return (
+                                            <MenuItem key={fuel} value={fuel}>
+                                                {fuel}
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Select>
+                                <FormHelperText sx={{ color: 'red', margin: 0 }}>{formik.errors.fuel}</FormHelperText>
+                            </FormControl>
+                        </div> */}
                     </DialogContent>
                     <DialogActions>
                         <Button type="submit">Submit</Button>
-                        <Button onClick={handleClose}>Cancel</Button>
+                        <Button
+                            onClick={() => {
+                                formik.resetForm();
+                                handleClose();
+                            }}
+                        >
+                            Cancel
+                        </Button>
                     </DialogActions>
                 </form>
             </Dialog>
+            {/* <Toastr message="Hai" severity="success"></Toastr> */}
         </>
     );
 }
