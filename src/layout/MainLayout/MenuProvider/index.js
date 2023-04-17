@@ -60,9 +60,9 @@ const SingleLevel = ({ item }) => {
                           borderBottom: 'solid 1px #EAECEE'
                       }
                     : {
-                          backgroundColor: '#48C9B0',
+                          backgroundColor: '#E5E7E9',
                           borderBottom: 'none',
-                          color: 'white',
+                          color: '#1C2833',
                           borderLeft: 'solid 3px white',
                           borderRight: 'solid 3px white',
                           borderTop: 'solid 1px white',
