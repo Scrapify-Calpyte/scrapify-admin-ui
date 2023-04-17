@@ -124,13 +124,8 @@ export default function Category({ categoryTrigger }) {
                         definedColumns={definedColumns}
                         searchColumns={searchColumns}
                         data={categories}
-                        isAction={true}
-                        isDetail={false}
-                        isEdit={true}
-                        isPagination={true}
                         rowAction={rowAction}
                         count={count}
-                        canShowSearch={true}
                         paginate={paginate}
                         searchEvent={search}
                     ></CommonTable>

@@ -10,6 +10,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import TextField from '@mui/material/TextField';
 import { useEffect } from 'react';
 import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 
 function CommonTable({
     displayedColumns = [],
@@ -126,26 +127,34 @@ function CommonTable({
                         return (
                             <tr key={'r' + index}>
                                 {definedColumns?.map((col, index) => {
-                                    return <td key={'d' + index}>{row[col]?.name ? row[col]?.name + '' : row[col] + ''}</td>;
+                                    return (
+                                        <td key={'d' + index}>
+                                            <Tooltip title={row[col]?.name ? row[col]?.name + '' : row[col] + ''} arrow placement="bottom">
+                                                <p style={{ width: 'fit-content' }}>
+                                                    {row[col]?.name ? row[col]?.name + '' : row[col] + ''}
+                                                </p>
+                                            </Tooltip>
+                                        </td>
+                                    );
                                 })}
                                 {isAction ? (
                                     <td>
                                         {isDetail ? (
                                             <IconButton size="small" onClick={() => rowAction({ name: 'detail', value: row?.id })}>
-                                                <RemoveRedEyeIcon />
+                                                <RemoveRedEyeIcon sx={{ color: '##8E44AD' }} />
                                             </IconButton>
                                         ) : (
                                             <></>
                                         )}
                                         {isEdit ? (
                                             <IconButton size="small" onClick={() => rowAction({ name: 'edit', value: row?.id })}>
-                                                <EditIcon sx={{ color: 'blue' }} />
+                                                <EditIcon sx={{ color: '#2980B9' }} />
                                             </IconButton>
                                         ) : (
                                             <></>
                                         )}
                                         <IconButton size="small" onClick={() => rowAction({ name: 'delete', value: row?.id })}>
-                                            <DeleteIcon sx={{ color: 'red' }} />
+                                            <DeleteIcon sx={{ color: '#C0392B' }} />
                                         </IconButton>
                                     </td>
                                 ) : (

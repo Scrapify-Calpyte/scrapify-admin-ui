@@ -123,13 +123,8 @@ export default function Product({ productTrigger }) {
                         definedColumns={definedColumns}
                         searchColumns={searchColumns}
                         data={products}
-                        isAction={true}
-                        isDetail={false}
-                        isEdit={true}
-                        isPagination={true}
                         rowAction={rowAction}
                         count={count}
-                        canShowSearch={true}
                         paginate={paginate}
                         searchEvent={search}
                     ></CommonTable>
