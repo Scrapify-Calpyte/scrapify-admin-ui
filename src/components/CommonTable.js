@@ -11,6 +11,7 @@ import TextField from '@mui/material/TextField';
 import { useEffect } from 'react';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 
 function CommonTable({
     displayedColumns = [],
@@ -163,6 +164,16 @@ function CommonTable({
                             </tr>
                         );
                     })}
+                    {data.length == 0 ? (
+                        <tr style={{ textAlign: 'center' }}>
+                            <td style={{ padding: '50px' }} colSpan={displayedColumns.length + 1}>
+                                <SentimentVeryDissatisfiedIcon />
+                                &nbsp;No Records Found !
+                            </td>
+                        </tr>
+                    ) : (
+                        <></>
+                    )}
                 </tbody>
             </table>
             {isPagination ? (
